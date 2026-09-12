@@ -1,798 +1,1008 @@
-<!--
-==============================================================
-JAFREIN — QUICK EDIT SECTION
-==============================================================
-Everything you'll want to change lives in ONE place: the
-`CONFIG` object near the top of the <script> at the bottom of
-this file (search for "QUICK EDIT: CONFIG").
-
-  CONFIG.email              → your email address
-  CONFIG.phone              → your phone number
-  CONFIG.linkedin           → your LinkedIn PROFILE url (used in hero + contact)
-  CONFIG.github             → your GitHub PROFILE url (used in hero + contact)
-  CONFIG.resumeUrl          → link to a hosted resume PDF (leave "" to hide the button)
-
-  CONFIG.projects.<key>.linkedinPost → the LinkedIn POST url for that specific project
-  CONFIG.projects.<key>.github       → that project's GitHub repo url (leave "" to hide)
-  CONFIG.projects.<key>.images       → array of image paths, e.g. "images/multi-robot-1.jpg"
-
-Behavior:
-  - A project's "View LinkedIn Post" / "View GitHub" button only
-    appears once you replace its placeholder with a real
-    https:// URL. Until then it stays hidden — no dead links.
-  - Any image path that fails to load automatically falls back
-    to a labeled placeholder box, so you can drop this file in
-    with an empty /images folder and nothing looks broken.
-    Just create /images/ next to this file and add your photos.
-==============================================================
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jafrein A M — Robotics & Automation Engineering Student</title>
+<title>Jafrein A M — Robotics &amp; Automation Engineering</title>
+<meta name="description" content="Jafrein A M — Robotics and Automation Engineering student building ROS 2 navigation, multi-robot coordination, perception and industrial automation systems. Open to ROS 2 / robotics internship opportunities.">
+<meta property="og:title" content="Jafrein A M — Robotics &amp; Automation Engineering">
+<meta property="og:description" content="ROS 2, autonomous navigation, robot simulation, sensor systems and industrial automation. Open to robotics internship opportunities.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0A0C10">
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
-  :root{
-    --bg:#0a0e13;
-    --bg-panel:#0e141c;
-    --bg-panel-2:#101923;
-    --line:#1c2733;
-    --line-soft:#151f29;
-    --text:#dde3ea;
-    --text-dim:#8695a7;
-    --text-faint:#57687c;
-    --cyan:#4dd6e8;
-    --cyan-dim:#2a8a99;
-    --blue:#3f8cff;
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:        #0A0C10;
+  --bg-raise:  #0F1218;
+  --panel:     #10141A;
+  --panel-2:   #0D1015;
+  --line:      #1C222B;
+  --line-2:    #2A3241;
+  --ink:       #E9ECF0;
+  --ink-soft:  #A9B2BF;
+  --ink-dim:   #666F7C;
+
+  --cyan:      #4DD9E8;
+  --blue:      #5B8CFF;
+
+  --sim:       #E3B559;
+  --physical:  #57D9A0;
+  --concept:   #8A93A3;
+  --industrial:#E39A4F;
+
+  --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --display: 'Space Grotesk', var(--sans);
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --maxw: 1180px;
+  --edge: clamp(20px, 5vw, 64px);
+  --radius: 3px;
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto;}
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+}
+section, #main{scroll-margin-top:76px;}
+.skip-link{
+  position:absolute; left:12px; top:-60px; z-index:200;
+  background:var(--cyan); color:#04181c; padding:10px 16px; border-radius:var(--radius);
+  font-family:var(--mono); font-size:13px; transition:top .15s;
+}
+.skip-link:focus{top:12px;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+img,video{max-width:100%; display:block;}
+a{color:inherit; text-decoration:none;}
+h1,h2,h3,h4{font-family:var(--display); margin:0; font-weight:600; letter-spacing:-0.01em;}
+p{margin:0;}
+button{font-family:inherit; cursor:pointer;}
+.wrap{max-width:var(--maxw); margin:0 auto; padding-left:var(--edge); padding-right:var(--edge);}
+.mono{font-family:var(--mono);}
+
+:focus-visible{outline:2px solid var(--cyan); outline-offset:3px;}
+
+/* subtle blueprint grid used behind hero + section backdrops */
+.grid-bg{
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:44px 44px;
+  opacity:0.35;
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+header.site-nav{
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(10,12,16,0.82);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  max-width:var(--maxw); margin:0 auto; padding:0 var(--edge);
+  height:64px; display:flex; align-items:center; justify-content:space-between;
+}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-size:14px; letter-spacing:0.02em;}
+.brand svg{display:block;}
+.nav-links{display:flex; align-items:center; gap:28px; font-size:14px; color:var(--ink-soft);}
+.nav-links a{transition:color .15s;}
+.nav-links a:hover{color:var(--ink);}
+.nav-cta{
+  font-family:var(--mono); font-size:13px; color:var(--bg); background:var(--cyan);
+  padding:8px 16px; border-radius:var(--radius); transition:opacity .15s;
+}
+.nav-cta:hover{opacity:0.85;}
+.nav-toggle{display:none; background:none; border:1px solid var(--line-2); border-radius:var(--radius); width:40px; height:36px; color:var(--ink); align-items:center; justify-content:center;}
+@media (max-width:860px){
+  .nav-links{
+    position:fixed; top:64px; left:0; right:0; bottom:0;
+    background:var(--bg); flex-direction:column; align-items:flex-start;
+    padding:32px var(--edge); gap:22px; font-size:18px;
+    transform:translateX(100%); transition:transform .25s ease;
   }
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  @media (prefers-reduced-motion: reduce){
-    html{scroll-behavior:auto;}
-    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
-  }
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  .mono{font-family:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;}
-  a{color:var(--cyan);text-decoration:none;}
-  a:hover{text-decoration:underline;}
-  a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
-  img{max-width:100%;display:block;}
-  .wrap{max-width:1080px;margin:0 auto;padding:0 40px;}
-  section{border-bottom:1px solid var(--line-soft);}
-  h1,h2,h3{font-weight:600;letter-spacing:-0.01em;}
-  .section-head{display:flex;align-items:baseline;gap:16px;margin-bottom:44px;}
-  .section-num{font-family:"IBM Plex Mono",monospace;color:var(--cyan-dim);font-size:14px;}
-  .section-title{font-size:28px;color:var(--text);}
-  .section-title span{color:var(--text-faint);font-weight:400;}
-  .rule{flex:1;height:1px;background:var(--line);}
+  .nav-links.open{transform:translateX(0);}
+  .nav-toggle{display:flex;}
+}
 
-  /* ---------- SKIP LINK ---------- */
-  .skip-link{position:absolute;left:-999px;top:0;background:var(--cyan);color:#04141a;padding:10px 16px;z-index:200;}
-  .skip-link:focus{left:16px;top:16px;}
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  position:relative; padding:clamp(110px,20vw,140px) 0 clamp(56px,8vw,72px); overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.hero .grid-bg{position:absolute; inset:0; z-index:0; mask-image:linear-gradient(to bottom, black, transparent 85%);}
+.hero-inner{position:relative; z-index:1; display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+@media (max-width:860px){
+  .hero-inner{grid-template-columns:1fr; gap:36px;}
+  .hero-visual{max-width:300px; margin:0 auto;}
+}
+.status-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--physical);
+  border:1px solid rgba(87,217,160,0.35); background:rgba(87,217,160,0.06);
+  padding:6px 12px; border-radius:99px; margin-bottom:26px;
+}
+.status-pill .dot{width:6px; height:6px; border-radius:50%; background:var(--physical); animation:pulse-dot 2.4s ease-in-out infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+.hero h1{font-size:clamp(2.4rem, 4.6vw, 3.6rem); line-height:1.05; color:var(--ink);}
+.hero .role{font-family:var(--mono); font-size:clamp(0.95rem, 1.4vw, 1.05rem); color:var(--cyan); margin-top:16px; letter-spacing:0.01em;}
+.hero .keywords{margin-top:10px; color:var(--ink-dim); font-family:var(--mono); font-size:13px; letter-spacing:0.01em;}
+.hero .positioning{margin-top:26px; max-width:52ch; color:var(--ink-soft); font-size:1.02rem;}
+.hero-ctas{display:flex; flex-wrap:wrap; gap:12px; margin-top:34px;}
+.btn{
+  font-size:14px; font-weight:500; padding:12px 20px; border-radius:var(--radius);
+  display:inline-flex; align-items:center; gap:8px; transition:all .15s ease; border:1px solid transparent;
+}
+.btn-primary{background:var(--cyan); color:#04181c;}
+.btn-primary:hover{background:#66e2ee;}
+.btn-outline{border-color:var(--line-2); color:var(--ink);}
+.btn-outline:hover{border-color:var(--cyan); color:var(--cyan);}
+.btn-ghost{color:var(--ink-soft); font-family:var(--mono); font-size:13px;}
+.btn-ghost:hover{color:var(--ink);}
 
-  /* ---------- HERO ---------- */
-  #hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-    background:radial-gradient(1200px 500px at 78% 10%, rgba(61,140,255,0.10), transparent 60%),var(--bg);
-    overflow:hidden;}
-  #hero .grid-bg{position:absolute;inset:0;
-    background-image:linear-gradient(var(--line-soft) 1px, transparent 1px),linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
-    background-size:64px 64px;
-    mask-image:linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0) 85%);
-    opacity:0.6;}
-  #hero .node-graphic{position:absolute;right:-40px;top:50%;transform:translateY(-50%);width:520px;opacity:0.9;}
-  #hero .node-graphic .pulse-line{animation:dashflow 5s linear infinite;}
-  @keyframes dashflow{to{stroke-dashoffset:-40;}}
-  #hero .hero-inner{position:relative;z-index:2;padding-top:64px;}
-  .status-row{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-family:"IBM Plex Mono",monospace;font-size:13px;margin-bottom:24px;}
-  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulseDot 2.2s ease-in-out infinite;flex-shrink:0;}
-  @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:0.35;}}
-  .hero-name{font-size:clamp(40px,6.4vw,76px);line-height:1.04;font-weight:650;color:var(--text);max-width:760px;}
-  .hero-name em{font-style:normal;color:var(--cyan);}
-  .hero-role{font-family:"IBM Plex Mono",monospace;font-size:14.5px;letter-spacing:0.02em;color:var(--text-dim);margin-top:22px;max-width:600px;}
-  .hero-tagline{max-width:560px;margin-top:18px;font-size:17px;color:var(--text-dim);}
-  .hero-ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:40px;}
-  .btn{font-family:"IBM Plex Mono",monospace;font-size:13.5px;padding:14px 24px;border:1px solid var(--cyan-dim);cursor:pointer;transition:background 0.15s,border-color 0.15s;}
-  .btn-primary{background:var(--cyan);color:#04141a;border-color:var(--cyan);}
-  .btn-primary:hover{background:#6fe1f0;text-decoration:none;}
-  .btn-secondary{background:transparent;color:var(--text);border-color:var(--line);}
-  .btn-secondary:hover{border-color:var(--cyan-dim);color:var(--cyan);text-decoration:none;}
-  .hero-secondary{display:flex;flex-wrap:wrap;gap:24px;margin-top:44px;padding-top:24px;border-top:1px solid var(--line);
-    font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text-dim);max-width:640px;}
-  .hero-secondary a{color:var(--text-dim);}
-  .hero-secondary a:hover{color:var(--cyan);}
+/* hero visual: ROS node graph over occupancy grid */
+.hero-visual{position:relative; aspect-ratio:1/1; max-width:460px; margin:0 auto;}
+.hero-visual svg{width:100%; height:100%;}
+.node-pulse{animation:node-pulse 3s ease-in-out infinite;}
+@keyframes node-pulse{0%,100%{opacity:0.55;} 50%{opacity:1;}}
+.path-trace{stroke-dasharray:6 8; animation:dash 3.5s linear infinite;}
+@keyframes dash{to{stroke-dashoffset:-140;}}
+.hud-label{font-family:var(--mono); font-size:9px; fill:var(--ink-dim); letter-spacing:0.05em;}
 
-  /* ---------- ABOUT ---------- */
-  #about{padding:120px 0;}
-  .about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:64px;align-items:start;}
-  .about-body p{color:var(--text-dim);font-size:16.5px;max-width:54ch;margin-bottom:18px;}
-  .about-body p strong{color:var(--text);font-weight:600;}
-  .focus-panel{border:1px solid var(--line);background:var(--bg-panel);padding:28px;}
-  .focus-panel h4{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--text-faint);font-weight:500;margin-bottom:18px;letter-spacing:0.02em;}
-  .focus-list{list-style:none;}
-  .focus-list li{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft);color:var(--text);font-size:15px;}
-  .focus-list li:last-child{border-bottom:none;}
-  .focus-list li::before{content:"";width:5px;height:5px;background:var(--cyan);flex-shrink:0;}
+/* ============================================================
+   SECTION SHELL
+   ============================================================ */
+section{padding:clamp(56px,8vw,84px) 0; border-bottom:1px solid var(--line);}
+.section-head{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:36px; flex-wrap:wrap;}
+.section-head .index{font-family:var(--mono); font-size:12px; color:var(--ink-dim); letter-spacing:0.05em; margin-bottom:10px; display:block;}
+.section-head h2{font-size:clamp(1.6rem, 2.6vw, 2.1rem); color:var(--ink);}
+.section-head .lede{max-width:42ch; color:var(--ink-soft); font-size:0.98rem;}
 
-  /* ---------- STACK ---------- */
-  #stack{padding:120px 0;}
-  .stack-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
-  .stack-card{background:var(--bg-panel);padding:24px 20px;min-height:180px;display:flex;flex-direction:column;}
-  .stack-card h4{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--cyan-dim);letter-spacing:0.03em;margin-bottom:16px;}
-  .stack-card ul{list-style:none;flex:1;}
-  .stack-card li{color:var(--text-dim);font-size:14px;padding:6px 0;border-top:1px solid var(--line-soft);}
-  .stack-card li:first-child{border-top:none;}
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid{display:grid; grid-template-columns:0.4fr 0.6fr; gap:56px;}
+.about-tags{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--line);}
+.about-tags div{display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:13px;}
+.about-tags span:first-child{color:var(--ink-dim);}
+.about-body p{color:var(--ink-soft); font-size:1.05rem; margin-bottom:18px; max-width:64ch;}
+.about-body p strong{color:var(--ink); font-weight:500;}
 
-  /* ---------- PROJECT FILTER ---------- */
-  #projects{padding:120px 0;}
-  .filter-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:40px;}
-  .filter-btn{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:0.02em;color:var(--text-dim);
-    background:var(--bg-panel);border:1px solid var(--line);padding:9px 16px;cursor:pointer;transition:all 0.15s;}
-  .filter-btn:hover{border-color:var(--cyan-dim);color:var(--text);}
-  .filter-btn.active{border-color:var(--cyan);color:var(--cyan);background:var(--bg-panel-2);}
+/* ============================================================
+   STACK
+   ============================================================ */
+.stack-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+.stack-cat{background:var(--panel); padding:26px 24px;}
+.stack-cat h3{font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--cyan); text-transform:uppercase; margin-bottom:6px;}
+.stack-cat .role{font-size:12.5px; color:var(--ink-dim); margin-bottom:18px; line-height:1.5;}
+.stack-cat ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px;}
+.stack-cat li{font-size:14.5px; color:var(--ink-soft); border-left:2px solid var(--line-2); padding-left:10px;}
+@media (max-width:900px){.stack-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:520px){.stack-grid{grid-template-columns:1fr;}}
 
-  /* ---------- PROJECT CARDS ---------- */
-  .project{border:1px solid var(--line);background:var(--bg-panel);margin-bottom:28px;transition:opacity 0.2s,transform 0.2s;}
-  .project.hidden-by-filter{display:none;}
-  .project.featured{border-color:var(--cyan-dim);}
-  .project-top{display:flex;justify-content:space-between;align-items:flex-start;padding:32px 36px;gap:24px;flex-wrap:wrap;}
-  .status-badge{display:inline-flex;align-items:center;gap:7px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:0.03em;
-    color:var(--text-dim);border:1px solid var(--line);padding:5px 11px;white-space:nowrap;}
-  .status-badge .b-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .status-badge.simulation{color:var(--cyan);border-color:var(--cyan-dim);}
-  .status-badge.simulation .b-dot{background:var(--cyan);}
-  .status-badge.physical{color:var(--text);border-color:#3a5a4a;}
-  .status-badge.physical .b-dot{background:#5fd6a0;}
-  .status-badge.concept .b-dot{background:transparent;border:1.5px solid var(--text-faint);}
-  .featured-flag{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--cyan);letter-spacing:0.06em;margin-bottom:8px;}
-  .project-title{font-size:22px;color:var(--text);margin-bottom:6px;}
-  .project.featured .project-title{font-size:27px;}
-  .project-sub{color:var(--text-faint);font-size:14px;}
-  .project-body{padding:0 36px 36px;}
-  .kv-grid{display:grid;grid-template-columns:120px 1fr;gap:12px 20px;margin-bottom:24px;}
-  .kv-grid dt{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--text-faint);padding-top:2px;letter-spacing:0.02em;}
-  .kv-grid dd{color:var(--text-dim);font-size:15px;}
-  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
-  .chip{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--text-dim);border:1px solid var(--line);padding:4px 10px;}
+/* ============================================================
+   PROJECT FILTERS
+   ============================================================ */
+.filters{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:44px;}
+.filter-btn{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:0.02em; color:var(--ink-soft);
+  border:1px solid var(--line-2); padding:8px 16px; border-radius:99px; background:transparent; transition:all .15s;
+}
+.filter-btn:hover{border-color:var(--cyan); color:var(--cyan);}
+.filter-btn.active{background:var(--cyan); color:#04181c; border-color:var(--cyan);}
+.filter-empty{font-family:var(--mono); font-size:13px; color:var(--ink-dim); padding:20px 0;}
 
-  /* ---------- ARCHITECTURE FLOW ---------- */
-  .arch-diagram{background:var(--bg-panel-2);border:1px solid var(--line);padding:26px 22px;margin-bottom:24px;}
-  .arch-diagram .cap{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--text-faint);margin-bottom:18px;}
-  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:0;}
-  .flow-step{border:1px solid var(--cyan-dim);background:var(--bg);padding:13px 15px;font-family:"IBM Plex Mono",monospace;
-    font-size:12px;color:var(--text);text-align:center;min-width:118px;flex:1 1 118px;}
-  .flow-arrow{color:var(--cyan);padding:0 10px;font-size:16px;flex-shrink:0;animation:archPulse 2.6s ease-in-out infinite;}
-  @keyframes archPulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
-  @media(max-width:640px){
-    .flow{flex-direction:column;align-items:stretch;}
-    .flow-step{width:100%;}
-    .flow-arrow{transform:rotate(90deg);padding:4px 0;align-self:center;}
-  }
+/* ============================================================
+   FEATURED PROJECT
+   ============================================================ */
+.featured{
+  border:1px solid var(--line-2); background:var(--panel); border-radius:var(--radius); overflow:hidden; margin-bottom:44px;
+}
+.featured-top{padding:36px var(--edge) 0; display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap;}
+.featured-eyebrow{font-family:var(--mono); font-size:11.5px; color:var(--ink-dim); letter-spacing:0.06em;}
+.featured-top h3{font-size:clamp(1.5rem,2.6vw,2rem); margin-top:8px; color:var(--ink);}
+.status-tag{
+  font-family:var(--mono); font-size:11px; letter-spacing:0.05em; padding:5px 11px; border-radius:99px;
+  border:1px solid; white-space:nowrap; text-transform:uppercase;
+}
+.status-tag.sim{color:var(--sim); border-color:rgba(227,181,89,0.4); background:rgba(227,181,89,0.07);}
+.status-tag.physical{color:var(--physical); border-color:rgba(87,217,160,0.4); background:rgba(87,217,160,0.07);}
+.status-tag.concept{color:var(--concept); border-color:rgba(138,147,163,0.4); background:rgba(138,147,163,0.07);}
+.status-tag.industrial{color:var(--industrial); border-color:rgba(227,154,79,0.4); background:rgba(227,154,79,0.07);}
 
-  /* ---------- IMAGE GALLERY ---------- */
-  .gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
-  .gallery-item{position:relative;aspect-ratio:4/3;overflow:hidden;border:1px solid var(--line);cursor:pointer;background:var(--bg-panel-2);}
-  .gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.25s;}
-  .gallery-item:hover img{transform:scale(1.05);}
-  .gallery-item.img-missing img{display:none;}
-  .img-fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;
-    text-align:center;padding:10px;gap:4px;}
-  .gallery-item.img-missing .img-fallback{display:flex;}
-  .img-fallback .tag-mini{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--text-faint);letter-spacing:0.08em;}
-  .img-fallback p{font-size:10.5px;color:var(--text-faint);line-height:1.4;}
-  .img-fallback code{font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--cyan-dim);word-break:break-all;}
+.case-fields{display:grid; grid-template-columns:1fr 1fr; gap:28px; padding:28px var(--edge) 8px;}
+.case-field .k{font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:8px;}
+.case-field .v{color:var(--ink-soft); font-size:14.5px; line-height:1.65;}
 
-  .proof-block{border-top:1px solid var(--line-soft);padding-top:18px;}
-  .proof-caption{font-size:13.5px;color:var(--text-faint);margin-bottom:14px;}
-  .project-links{display:flex;flex-wrap:wrap;gap:12px;}
-  .btn-link{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--cyan);border:1px solid var(--cyan-dim);padding:8px 14px;transition:background 0.15s;}
-  .btn-link:hover{background:rgba(77,214,232,0.08);text-decoration:none;}
-  .btn-link.gh{color:var(--text-dim);border-color:var(--line);}
-  .btn-link.gh:hover{color:var(--text);border-color:var(--text-faint);}
+.arch-flow{
+  display:flex; align-items:stretch; gap:0; padding:32px var(--edge); overflow-x:auto;
+}
+.arch-step{
+  flex:1; min-width:150px; background:var(--panel-2); border:1px solid var(--line-2); border-radius:var(--radius);
+  padding:16px 14px; text-align:center; position:relative;
+}
+.arch-step .n{font-family:var(--mono); font-size:10px; color:var(--cyan); margin-bottom:8px; display:block;}
+.arch-step .t{font-size:13px; color:var(--ink); line-height:1.4;}
+.arch-arrow{display:flex; align-items:center; justify-content:center; width:34px; flex:none; color:var(--ink-dim);}
+@media (max-width:940px){
+  .arch-flow{flex-direction:column;}
+  .arch-arrow{width:auto; height:26px; transform:rotate(90deg);}
+}
+@media (max-width:760px){
+  .case-fields{grid-template-columns:1fr;}
+}
 
-  /* ---------- LIGHTBOX ---------- */
-  .lightbox{position:fixed;inset:0;background:rgba(4,7,11,0.92);display:none;align-items:center;justify-content:center;
-    z-index:300;padding:40px;}
-  .lightbox.open{display:flex;}
-  .lightbox img{max-width:min(900px,100%);max-height:82vh;border:1px solid var(--line);}
-  .lightbox-close{position:absolute;top:24px;right:32px;font-family:"IBM Plex Mono",monospace;font-size:14px;color:var(--text-dim);
-    background:transparent;border:1px solid var(--line);padding:8px 14px;cursor:pointer;}
-  .lightbox-close:hover{color:var(--cyan);border-color:var(--cyan-dim);}
+.tech-tags{display:flex; flex-wrap:wrap; gap:8px; padding:0 var(--edge) 28px;}
+.tech-tag{font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); border:1px solid var(--line); padding:5px 10px; border-radius:var(--radius);}
 
-  /* ---------- TIMELINE ---------- */
-  #experience{padding:120px 0;}
-  .tl{position:relative;padding-left:32px;}
-  .tl::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--line);}
-  .tl-item{position:relative;padding-bottom:36px;}
-  .tl-item:last-child{padding-bottom:0;}
-  .tl-item::before{content:"";position:absolute;left:-32px;top:5px;width:9px;height:9px;background:var(--bg);border:2px solid var(--line-soft);border-radius:50%;}
-  .tl-item.highlight::before{border-color:var(--cyan);box-shadow:0 0 6px rgba(77,214,232,0.5);}
-  .tl-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:6px;}
-  .tl-head h4{font-size:17px;color:var(--text);}
-  .tl-relevant{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--cyan);border:1px solid var(--cyan-dim);padding:2px 8px;margin-left:10px;vertical-align:middle;}
-  .tl-head .dur{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--text-faint);white-space:nowrap;}
-  .tl-item p{color:var(--text-dim);font-size:15px;max-width:60ch;}
+.featured-media{padding:0 var(--edge) 28px;}
+.featured-media video{width:100%; border-radius:var(--radius); border:1px solid var(--line-2); background:#000; aspect-ratio:16/9; object-fit:cover;}
+.featured-media .thumbs{display:flex; gap:10px; margin-top:12px;}
+.featured-media .thumbs a{flex:1; display:block; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line-2); transition:opacity .15s;}
+.featured-media .thumbs a:hover{opacity:0.8;}
+.featured-media .thumbs img{width:100%; height:90px; object-fit:cover;}
+@media (max-width:520px){.featured-media .thumbs{flex-wrap:wrap;} .featured-media .thumbs a{flex:1 1 30%;}}
 
-  /* ---------- LEADERSHIP ---------- */
-  #leadership{padding:0 0 120px;}
-  .lead-list{list-style:none;display:grid;gap:14px;}
-  .lead-list li{display:flex;gap:16px;color:var(--text-dim);font-size:15.5px;padding:18px 22px;border:1px solid var(--line);background:var(--bg-panel);}
-  .lead-list li::before{content:"›";color:var(--cyan);font-family:"IBM Plex Mono",monospace;font-weight:700;}
+.featured-footer{
+  display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:20px var(--edge); border-top:1px solid var(--line); background:var(--panel-2);
+}
+.proof-note{font-size:13px; color:var(--ink-dim); max-width:48ch;}
+.proof-links{display:flex; gap:18px;}
+.proof-links a{font-family:var(--mono); font-size:12.5px; color:var(--cyan); display:flex; align-items:center; gap:4px;}
+.proof-links a:hover{text-decoration:underline;}
 
-  /* ---------- EDUCATION / CLOSE ---------- */
-  #close{padding:120px 0 100px;}
-  .edu-row{display:flex;justify-content:space-between;gap:40px;flex-wrap:wrap;border:1px solid var(--line);background:var(--bg-panel);padding:32px 36px;margin-bottom:64px;}
-  .edu-row h4{font-size:19px;color:var(--text);margin-bottom:6px;}
-  .edu-row .school{color:var(--text-dim);font-size:15px;}
-  .edu-meta{text-align:right;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--text-faint);}
-  .edu-meta .cgpa{color:var(--cyan);font-size:15px;margin-bottom:4px;}
-  .direction-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:64px;}
-  .direction-grid div{background:var(--bg-panel);padding:16px 22px;color:var(--text-dim);font-size:15px;}
-  .cta-block{text-align:left;border-top:1px solid var(--line);padding-top:56px;}
-  .cta-line{font-size:clamp(22px,3.2vw,32px);color:var(--text);max-width:680px;line-height:1.3;margin-bottom:36px;}
-  .cta-buttons{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:48px;}
-  .contact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
-  .contact-grid a{background:var(--bg-panel);padding:22px 20px;color:var(--text-dim);font-family:"IBM Plex Mono",monospace;font-size:13px;}
-  .contact-grid a:hover{color:var(--cyan);text-decoration:none;background:var(--bg-panel-2);}
-  .contact-grid a .k{display:block;color:var(--text-faint);font-size:11px;margin-bottom:6px;}
+/* ============================================================
+   PROJECT CARDS (secondary)
+   ============================================================ */
+.projects-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:24px;}
+.project-card{
+  border:1px solid var(--line-2); background:var(--panel); border-radius:var(--radius);
+  padding:26px; display:flex; flex-direction:column; gap:16px; transition:border-color .15s;
+}
+.project-card:hover{border-color:var(--line-2);}
+.pc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:12px;}
+.pc-top h4{font-size:1.15rem; color:var(--ink);}
+.pc-problem{font-size:13.5px; color:var(--ink-soft); line-height:1.6;}
+.pc-field{font-size:12.5px; color:var(--ink-dim); line-height:1.6;}
+.pc-field b{color:var(--ink-soft); font-weight:500;}
+.mini-flow{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-family:var(--mono); font-size:10.5px; color:var(--ink-soft);}
+.mini-flow .step{border:1px solid var(--line); padding:4px 8px; border-radius:var(--radius); background:var(--panel-2);}
+.mini-flow .sep{color:var(--ink-dim);}
+.pc-tags{display:flex; flex-wrap:wrap; gap:6px;}
+.pc-tags span{font-family:var(--mono); font-size:10.5px; color:var(--ink-dim); border:1px solid var(--line); padding:3px 8px; border-radius:var(--radius);}
+.pc-links{display:flex; gap:16px; margin-top:2px;}
+.pc-links a{font-family:var(--mono); font-size:12px; color:var(--cyan);}
+.pc-links a:hover{text-decoration:underline;}
+@media (max-width:760px){.projects-grid{grid-template-columns:1fr;}}
 
-  footer{padding:40px;text-align:center;color:var(--text-faint);font-family:"IBM Plex Mono",monospace;font-size:12px;}
+/* industrial visual variant */
+.industrial-panel{
+  border:1px solid rgba(227,154,79,0.3); background:linear-gradient(180deg, rgba(227,154,79,0.05), transparent);
+}
+.ladder{display:flex; flex-direction:column; gap:0; font-family:var(--mono); font-size:11px; color:var(--ink-soft); margin-top:4px;}
+.ladder .rung{display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px dashed var(--line);}
+.ladder .rail{color:var(--industrial);}
 
-  @media(max-width:900px){
-    .stack-grid{grid-template-columns:repeat(2,1fr);}
-  }
-  @media(max-width:820px){
-    .wrap{padding:0 22px;}
-    .about-grid{grid-template-columns:1fr;}
-    .contact-grid{grid-template-columns:repeat(2,1fr);}
-    .kv-grid{grid-template-columns:100px 1fr;}
-    #hero .node-graphic{display:none;}
-    .direction-grid{grid-template-columns:1fr;}
-  }
+/* ============================================================
+   TIMELINE
+   ============================================================ */
+.timeline{position:relative; padding-left:26px; border-left:1px solid var(--line-2); display:flex; flex-direction:column; gap:34px;}
+.tl-item{position:relative;}
+.tl-item::before{content:''; position:absolute; left:-31px; top:4px; width:9px; height:9px; border-radius:50%; background:var(--cyan);}
+.tl-item.primary::before{background:var(--cyan); box-shadow:0 0 0 4px rgba(77,217,232,0.15);}
+.tl-head{display:flex; justify-content:space-between; align-items:baseline; gap:16px; flex-wrap:wrap;}
+.tl-head h4{font-size:1.05rem; color:var(--ink);}
+.tl-meta{font-family:var(--mono); font-size:12px; color:var(--ink-dim); white-space:nowrap;}
+.tl-org{font-size:13px; color:var(--ink-dim); margin-top:2px;}
+.tl-topics{margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;}
+.tl-topics span{font-family:var(--mono); font-size:11px; color:var(--ink-soft); border:1px solid var(--line); padding:3px 9px; border-radius:99px;}
+.tl-highlight{font-family:var(--mono); font-size:11px; color:var(--cyan); margin-top:10px; display:inline-block; letter-spacing:0.03em;}
+
+/* ============================================================
+   LEADERSHIP / EDUCATION / DIRECTION
+   ============================================================ */
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:56px;}
+.plain-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:18px;}
+.plain-list li{position:relative; padding-left:20px; color:var(--ink-soft); font-size:14.5px; line-height:1.6;}
+.plain-list li::before{content:''; position:absolute; left:0; top:9px; width:6px; height:1px; background:var(--cyan);}
+.edu-card{border:1px solid var(--line-2); border-radius:var(--radius); padding:26px; background:var(--panel);}
+.edu-card h4{font-size:1.15rem; color:var(--ink); margin-bottom:6px;}
+.edu-meta{font-size:13.5px; color:var(--ink-soft); margin-bottom:14px;}
+.edu-stats{display:flex; gap:28px; font-family:var(--mono); border-top:1px solid var(--line); padding-top:14px;}
+.edu-stats div span{display:block;}
+.edu-stats .num{font-size:1.3rem; color:var(--cyan);}
+.edu-stats .lbl{font-size:11px; color:var(--ink-dim); margin-top:2px;}
+.direction-tags{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px;}
+.direction-tags span{font-family:var(--mono); font-size:12.5px; color:var(--ink); border:1px solid var(--line-2); padding:8px 14px; border-radius:var(--radius);}
+@media (max-width:860px){.two-col, .about-grid{grid-template-columns:1fr; gap:36px;}}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact{text-align:left;}
+.contact h2{font-size:clamp(1.8rem,3.4vw,2.6rem); max-width:20ch; margin-bottom:18px;}
+.contact .lede{color:var(--ink-soft); max-width:52ch; font-size:1.05rem; margin-bottom:44px;}
+.contact-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
+.contact-item{background:var(--panel); padding:24px; display:flex; flex-direction:column; gap:8px; transition:background .15s;}
+.contact-item:hover{background:var(--panel-2);}
+.contact-item .k{font-family:var(--mono); font-size:11px; color:var(--ink-dim); letter-spacing:0.06em;}
+.contact-item .v{font-size:14.5px; color:var(--ink); word-break:break-word;}
+@media (max-width:760px){.contact-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:480px){.contact-grid{grid-template-columns:1fr;}}
+
+footer{padding:28px 0; text-align:center;}
+footer p{font-family:var(--mono); font-size:11.5px; color:var(--ink-dim);}
+
+[hidden]{display:none !important;}
 </style>
 </head>
 <body>
-<a href="#main" class="skip-link">Skip to content</a>
+<a href="#main" class="skip-link">Skip to main content</a>
 
-<!-- ============ HERO ============ -->
-<section id="hero">
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<header class="site-nav">
+  <div class="nav-inner">
+    <a href="#main" class="brand">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="9" r="3.2" stroke="#4DD9E8" stroke-width="1.6"/>
+        <circle cx="7" cy="24" r="3.2" stroke="#4DD9E8" stroke-width="1.6"/>
+        <circle cx="25" cy="24" r="3.2" stroke="#4DD9E8" stroke-width="1.6"/>
+        <path d="M16 12.2V17M16 17L8.6 21.4M16 17l7.4 4.4" stroke="#5B8CFF" stroke-width="1.4"/>
+      </svg>
+      JAFREIN A M
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#about">About</a>
+      <a href="#stack">Stack</a>
+      <a href="#projects">Projects</a>
+      <a href="#timeline">Timeline</a>
+      <a href="#contact">Contact</a>
+      <a href="#" class="nav-cta" data-cfg-href="resumeUrl" data-hide-if-empty target="_blank" rel="noopener">Resume ↗</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="hero" id="main">
   <div class="grid-bg" aria-hidden="true"></div>
-  <svg class="node-graphic" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <g stroke="#1c2733" stroke-width="1">
-      <line x1="90" y1="120" x2="230" y2="90"/><line x1="230" y1="90" x2="380" y2="150"/>
-      <line x1="230" y1="90" x2="200" y2="240"/><line x1="90" y1="120" x2="120" y2="270"/>
-      <line x1="120" y1="270" x2="200" y2="240"/><line x1="200" y1="240" x2="330" y2="300"/>
-      <line x1="380" y1="150" x2="330" y2="300"/><line x1="120" y1="270" x2="160" y2="400"/>
-      <line x1="330" y1="300" x2="290" y2="420"/><line x1="160" y1="400" x2="290" y2="420"/>
-    </g>
-    <g class="pulse-line" stroke="#3f8cff" stroke-width="1" stroke-dasharray="4 6" opacity="0.55">
-      <line x1="230" y1="90" x2="380" y2="150"/><line x1="200" y1="240" x2="330" y2="300"/>
-    </g>
-    <g fill="#0e141c" stroke="#4dd6e8" stroke-width="1.4">
-      <circle cx="90" cy="120" r="5"/><circle cx="230" cy="90" r="7"/><circle cx="380" cy="150" r="5"/>
-      <circle cx="120" cy="270" r="5"/><circle cx="200" cy="240" r="7"/><circle cx="330" cy="300" r="5"/>
-      <circle cx="160" cy="400" r="5"/><circle cx="290" cy="420" r="5"/>
-    </g>
-  </svg>
-
   <div class="wrap hero-inner">
-    <div class="status-row"><span class="status-dot" aria-hidden="true"></span> Open to Robotics / ROS 2 Internship Opportunities</div>
-    <h1 class="hero-name">Jafrein A M<br><em>Robotics & Automation Engineering Student</em></h1>
-    <div class="hero-role">ROS 2 · AUTONOMOUS NAVIGATION · ROBOT SIMULATION · SENSOR SYSTEMS · INDUSTRIAL AUTOMATION</div>
-    <p class="hero-tagline">Building intelligent robotic systems through software, sensing and automation — moving from simulation into real-world robotics.</p>
-
-    <div class="hero-ctas">
-      <a href="#projects" class="btn btn-primary">Explore My Projects</a>
-      <a href="#" class="btn btn-secondary" data-cfg-href="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn</a>
+    <div>
+      <span class="status-pill"><span class="dot"></span>OPEN TO ROBOTICS / ROS 2 INTERNSHIP OPPORTUNITIES</span>
+      <h1>Jafrein A M</h1>
+      <p class="role">Robotics &amp; Automation Engineering Student</p>
+      <p class="keywords">ROS 2 · Autonomous Navigation · Robot Simulation · Sensor Systems · Industrial Automation</p>
+      <p class="positioning">Building intelligent robotic systems through software, sensing and automation — developing foundations in ROS 2, navigation and simulation, with hands-on exposure to industrial control.</p>
+      <div class="hero-ctas">
+        <a href="#projects" class="btn btn-primary">Explore Projects</a>
+        <a href="#" class="btn btn-outline" data-cfg-href="resumeUrl" data-hide-if-empty target="_blank" rel="noopener">View Resume ↗</a>
+        <a href="#" class="btn btn-ghost" data-cfg-href="linkedin" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="#" class="btn btn-ghost" data-cfg-href="github" target="_blank" rel="noopener">GitHub</a>
+        <a href="#contact" class="btn btn-ghost">Contact</a>
+      </div>
     </div>
 
-    <div class="hero-secondary">
-      <a href="#" data-cfg-href="github" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-      <a href="#" data-cfg-mailto="email">Email</a>
-      <a href="#" data-cfg-href="resumeUrl" data-hide-if-empty target="_blank" rel="noopener noreferrer">Resume ↗</a>
+    <div class="hero-visual" aria-hidden="true">
+      <svg viewBox="0 0 460 460" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="occ" width="23" height="23" patternUnits="userSpaceOnUse">
+            <rect width="23" height="23" fill="none"/>
+            <rect width="22" height="22" fill="#12161d"/>
+          </pattern>
+        </defs>
+        <rect x="20" y="20" width="420" height="420" fill="url(#occ)" stroke="#1C222B" stroke-width="1"/>
+        <!-- trajectory -->
+        <path class="path-trace" d="M70 360 C 140 320, 120 220, 200 190 S 340 120, 400 90" fill="none" stroke="#4DD9E8" stroke-width="2" opacity="0.75"/>
+        <!-- ROS graph edges -->
+        <line x1="120" y1="120" x2="230" y2="180" stroke="#2A3241" stroke-width="1.4"/>
+        <line x1="230" y1="180" x2="330" y2="130" stroke="#2A3241" stroke-width="1.4"/>
+        <line x1="230" y1="180" x2="260" y2="300" stroke="#2A3241" stroke-width="1.4"/>
+        <line x1="260" y1="300" x2="150" y2="330" stroke="#2A3241" stroke-width="1.4"/>
+        <!-- nodes -->
+        <g class="node-pulse">
+          <circle cx="120" cy="120" r="6" fill="#5B8CFF"/>
+          <text x="132" y="116" class="hud-label">/scan</text>
+        </g>
+        <g class="node-pulse" style="animation-delay:.4s">
+          <circle cx="230" cy="180" r="7" fill="#4DD9E8"/>
+          <text x="242" y="176" class="hud-label">/nav2</text>
+        </g>
+        <g class="node-pulse" style="animation-delay:.8s">
+          <circle cx="330" cy="130" r="6" fill="#5B8CFF"/>
+          <text x="342" y="126" class="hud-label">/odom</text>
+        </g>
+        <g class="node-pulse" style="animation-delay:1.2s">
+          <circle cx="260" cy="300" r="6" fill="#5B8CFF"/>
+          <text x="272" y="296" class="hud-label">/cmd_vel</text>
+        </g>
+        <g class="node-pulse" style="animation-delay:1.6s">
+          <circle cx="150" cy="330" r="6" fill="#5B8CFF"/>
+          <text x="162" y="326" class="hud-label">/tf</text>
+        </g>
+        <text x="34" y="42" class="hud-label">OCCUPANCY GRID · NODE GRAPH</text>
+        <text x="34" y="452" class="hud-label">GAZEBO / RVIZ VISUAL LANGUAGE — ILLUSTRATIVE</text>
+      </svg>
     </div>
   </div>
 </section>
 
-<main id="main">
-
-<!-- ============ ABOUT ============ -->
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
 <section id="about">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">01</span><span class="section-title">About</span><div class="rule"></div></div>
-    <div class="about-grid">
-      <div class="about-body">
-        <p><strong>I'm a Robotics and Automation Engineering student</strong> driven by understanding how robots perceive, navigate, and operate autonomously. I'm building my foundation through ROS 2, robot simulation, navigation, and SLAM, while also working across PLC and industrial automation.</p>
-        <p>My project work spans multi-robot simulation, gesture-based control, and PLC-driven automation systems — practical, hands-on ways of learning how software, sensing, and control come together in a working robotic system.</p>
-        <p>I'm looking to move beyond simulation into real-world robotic systems, and to grow through hands-on industry experience in robotics software engineering.</p>
+    <div class="section-head">
+      <div>
+        <span class="index">01 — ABOUT</span>
+        <h2>Learning how robots perceive and move</h2>
       </div>
-      <div class="focus-panel">
-        <h4>ENGINEERING FOCUS</h4>
-        <ul class="focus-list">
-          <li>ROS 2 & Simulation</li>
-          <li>Autonomous Navigation</li>
-          <li>SLAM & Multi-Robot Systems</li>
-          <li>Computer Vision (OpenCV)</li>
-          <li>Sensor Integration</li>
-          <li>PLC & Industrial Automation</li>
-        </ul>
+    </div>
+    <div class="about-grid">
+      <div class="about-tags">
+        <div><span>Focus</span><span>Robotics Software</span></div>
+        <div><span>Currently</span><span>Simulation → Real-world</span></div>
+        <div><span>Also</span><span>PLC / Automation</span></div>
+        <div><span>Based in</span><span>Chennai, India</span></div>
+      </div>
+      <div class="about-body">
+        <p>I'm a <strong>Robotics and Automation Engineering</strong> student interested in how robots perceive their environment, navigate it, and operate without constant manual control. Most of my current work sits inside <strong>ROS 2</strong> — building nodes, wiring topics and services, and testing navigation behavior in <strong>Gazebo</strong> before it ever needs to touch hardware.</p>
+        <p>I'm developing hands-on experience with <strong>Nav2, SLAM, and OpenCV</strong> for perception, alongside exposure to <strong>PLC and industrial automation</strong> — logic control, HMI and SCADA — which gives me a practical view of how automation works outside of mobile robotics too.</p>
+        <p>Right now I'm moving from simulation-focused learning toward real-world autonomous systems, and looking for a robotics or ROS 2 internship where I can build on that foundation.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ STACK ============ -->
+<!-- ============================================================
+     TECHNICAL STACK
+     ============================================================ -->
 <section id="stack">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">02</span><span class="section-title">Technical Stack</span><div class="rule"></div></div>
+    <div class="section-head">
+      <div>
+        <span class="index">02 — STACK</span>
+        <h2>Where each tool fits in the workflow</h2>
+      </div>
+      <p class="lede">Grouped by what each is used for, not ranked by proficiency.</p>
+    </div>
     <div class="stack-grid">
-      <div class="stack-card">
-        <h4>ROBOTICS</h4>
+      <div class="stack-cat">
+        <h3>Robotics</h3>
+        <p class="role">Simulation, navigation and mapping</p>
         <ul><li>ROS 2</li><li>Gazebo</li><li>Nav2</li><li>SLAM</li><li>AMR</li></ul>
       </div>
-      <div class="stack-card">
-        <h4>PROGRAMMING</h4>
+      <div class="stack-cat">
+        <h3>Programming</h3>
+        <p class="role">Node logic and embedded control</p>
         <ul><li>Python</li><li>C</li></ul>
       </div>
-      <div class="stack-card">
-        <h4>COMPUTER VISION / PERCEPTION</h4>
+      <div class="stack-cat">
+        <h3>Perception</h3>
+        <p class="role">Vision-based input for control</p>
         <ul><li>OpenCV</li></ul>
       </div>
-      <div class="stack-card">
-        <h4>DESIGN & ELECTRONICS</h4>
+      <div class="stack-cat">
+        <h3>Design &amp; Electronics</h3>
+        <p class="role">Mechanical &amp; circuit design</p>
         <ul><li>Fusion 360</li><li>EasyEDA</li></ul>
       </div>
-      <div class="stack-card">
-        <h4>INDUSTRIAL AUTOMATION</h4>
+      <div class="stack-cat">
+        <h3>Industrial Automation</h3>
+        <p class="role">Control logic and monitoring</p>
         <ul><li>PLC</li><li>Codesys</li><li>RSLogix</li><li>HMI</li><li>SCADA</li></ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ PROJECTS ============ -->
+<!-- ============================================================
+     PROJECTS
+     ============================================================ -->
 <section id="projects">
   <div class="wrap">
-    <div class="section-head"><span class="section-num">03</span><span class="section-title">Projects</span><div class="rule"></div></div>
-
-    <div class="filter-row" role="group" aria-label="Filter projects by category">
-      <button class="filter-btn active" data-filter="all">ALL</button>
-      <button class="filter-btn" data-filter="ros2">ROS 2</button>
-      <button class="filter-btn" data-filter="autonomous">AUTONOMOUS ROBOTS</button>
-      <button class="filter-btn" data-filter="cv">COMPUTER VISION</button>
-      <button class="filter-btn" data-filter="automation">INDUSTRIAL AUTOMATION</button>
-    </div>
-
-    <!-- ===== FEATURED: Multi-Robot Task Allocation ===== -->
-    <article class="project featured" data-category="ros2 autonomous" data-project-key="multiRobot">
-      <div class="project-top">
-        <div>
-          <div class="featured-flag">FEATURED PROJECT</div>
-          <div class="project-title">ROS 2 Multi-Robot Task Allocation & Navigation</div>
-          <div class="project-sub">Simulation — Gazebo / ROS 2</div>
-        </div>
-        <div class="status-badge simulation"><span class="b-dot"></span>SIMULATION</div>
-      </div>
-      <div class="project-body">
-        <dl class="kv-grid">
-          <dt>PROBLEM</dt><dd>Coordinating multiple mobile robots to complete tasks efficiently without central manual assignment.</dd>
-          <dt>APPROACH</dt><dd>Built a ROS 2 simulation in Gazebo where multiple mobile robots operate simultaneously, with tasks allocated based on each robot's proximity to the target workspace.</dd>
-          <dt>SYSTEM</dt><dd>Each robot navigates autonomously to its assigned workspace once a task is allocated, using ROS 2 for inter-node communication and coordination.</dd>
-          <dt>TECHNOLOGIES</dt><dd><div class="chip-row"><span class="chip">ROS 2</span><span class="chip">Gazebo</span><span class="chip">Nav2</span><span class="chip">Multi-robot coordination</span></div></dd>
-        </dl>
-
-        <div class="arch-diagram">
-          <div class="cap">SYSTEM ARCHITECTURE</div>
-          <div class="flow">
-            <div class="flow-step">Task Request</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Robot Selection /<br>Proximity Evaluation</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Task Allocation</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">ROS 2 / Nav2</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Autonomous<br>Navigation</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Target Workspace</div>
-          </div>
-        </div>
-
-        <div class="gallery" data-gallery-key="multiRobot"></div>
-
-        <div class="proof-block" data-proof-key="multiRobot">
-          <p class="proof-caption">Project documentation, simulation results and development updates are available on LinkedIn.</p>
-          <div class="project-links">
-            <a class="btn-link" data-type="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn Post ↗</a>
-            <a class="btn-link gh" data-type="github" target="_blank" rel="noopener noreferrer">View GitHub ↗</a>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- ===== Gesture-Controlled Robot ===== -->
-    <article class="project" data-category="ros2 cv" data-project-key="gestureRobot">
-      <div class="project-top">
-        <div><div class="project-title">Gesture-Controlled Robot</div><div class="project-sub">Simulation — ROS 2 / OpenCV / Gazebo</div></div>
-        <div class="status-badge simulation"><span class="b-dot"></span>SIMULATION</div>
-      </div>
-      <div class="project-body">
-        <dl class="kv-grid">
-          <dt>PROBLEM</dt><dd>Controlling a robot through natural, non-contact input rather than fixed manual commands.</dd>
-          <dt>APPROACH</dt><dd>Developed a simulated robotic system combining ROS 2, OpenCV, and Gazebo to recognize gestures and translate them into robot control commands.</dd>
-          <dt>TECHNOLOGIES</dt><dd><div class="chip-row"><span class="chip">ROS 2</span><span class="chip">OpenCV</span><span class="chip">Gazebo</span></div></dd>
-        </dl>
-
-        <div class="arch-diagram">
-          <div class="cap">SIGNAL FLOW</div>
-          <div class="flow">
-            <div class="flow-step">Camera</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">OpenCV</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Gesture<br>Recognition</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">ROS 2 Command</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Robot</div>
-          </div>
-        </div>
-
-        <div class="gallery" data-gallery-key="gestureRobot"></div>
-
-        <div class="proof-block" data-proof-key="gestureRobot">
-          <p class="proof-caption">Project documentation, simulation results and development updates are available on LinkedIn.</p>
-          <div class="project-links">
-            <a class="btn-link" data-type="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn Post ↗</a>
-            <a class="btn-link gh" data-type="github" target="_blank" rel="noopener noreferrer">View GitHub ↗</a>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- ===== Disaster Management Robot ===== -->
-    <article class="project" data-category="autonomous" data-project-key="disasterRobot">
-      <div class="project-top">
-        <div><div class="project-title">Disaster Management Robot</div><div class="project-sub">Concept-stage robotic system</div></div>
-        <div class="status-badge concept"><span class="b-dot"></span>CONCEPT</div>
-      </div>
-      <div class="project-body">
-        <dl class="kv-grid">
-          <dt>PROBLEM</dt><dd>Assisting rescue teams by helping detect and respond to conditions in disaster-affected environments.</dd>
-          <dt>APPROACH</dt><dd>Developed a robotic concept focused on detecting hazards and assisting in rescue-related operations within disaster environments.</dd>
-          <dt>STATUS</dt><dd>Currently at concept and architecture stage — not yet a deployed system.</dd>
-        </dl>
-
-        <div class="gallery" data-gallery-key="disasterRobot"></div>
-
-        <div class="proof-block" data-proof-key="disasterRobot">
-          <p class="proof-caption">Project documentation, simulation results and development updates are available on LinkedIn.</p>
-          <div class="project-links">
-            <a class="btn-link" data-type="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn Post ↗</a>
-            <a class="btn-link gh" data-type="github" target="_blank" rel="noopener noreferrer">View GitHub ↗</a>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- ===== Obstacle Avoidance Robot ===== -->
-    <article class="project" data-category="autonomous" data-project-key="obstacleRobot">
-      <div class="project-top">
-        <div><div class="project-title">Obstacle Avoidance Robot</div><div class="project-sub">Mobile robot build</div></div>
-        <div class="status-badge physical"><span class="b-dot"></span>PHYSICAL BUILD</div>
-      </div>
-      <div class="project-body">
-        <dl class="kv-grid">
-          <dt>PROBLEM</dt><dd>Enabling a mobile robot to move through an environment without colliding with obstacles.</dd>
-          <dt>APPROACH</dt><dd>Built a mobile robot capable of detecting obstacles in its path and navigating around them to avoid collisions.</dd>
-        </dl>
-
-        <div class="gallery" data-gallery-key="obstacleRobot"></div>
-
-        <div class="proof-block" data-proof-key="obstacleRobot">
-          <p class="proof-caption">Project documentation, simulation results and development updates are available on LinkedIn.</p>
-          <div class="project-links">
-            <a class="btn-link" data-type="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn Post ↗</a>
-            <a class="btn-link gh" data-type="github" target="_blank" rel="noopener noreferrer">View GitHub ↗</a>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <!-- ===== PLC / HMI / SCADA ===== -->
-    <article class="project" data-category="automation" data-project-key="plcScada">
-      <div class="project-top">
-        <div><div class="project-title">Industrial Automation System — PLC, HMI & SCADA</div><div class="project-sub">Simulated automation system</div></div>
-        <div class="status-badge simulation"><span class="b-dot"></span>SIMULATION</div>
-      </div>
-      <div class="project-body">
-        <dl class="kv-grid">
-          <dt>PROBLEM</dt><dd>Automating conveyor operation with reliable monitoring, control, and fault visibility.</dd>
-          <dt>APPROACH</dt><dd>Developed a simulated automation system integrating PLC-based conveyor control with Auto/Manual operation modes, product counting, and VFD (variable frequency drive) control.</dd>
-          <dt>SYSTEM</dt><dd>HMI monitoring and alarms feed into a SCADA layer for process visualization.</dd>
-          <dt>TECHNOLOGIES</dt><dd><div class="chip-row"><span class="chip">PLC</span><span class="chip">HMI</span><span class="chip">SCADA</span><span class="chip">VFD Control</span></div></dd>
-        </dl>
-
-        <div class="arch-diagram">
-          <div class="cap">CONTROL FLOW</div>
-          <div class="flow">
-            <div class="flow-step">Sensors /<br>Inputs</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">PLC Logic</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">Conveyor / VFD</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">HMI</div><div class="flow-arrow" aria-hidden="true">→</div>
-            <div class="flow-step">SCADA</div>
-          </div>
-        </div>
-
-        <div class="gallery" data-gallery-key="plcScada"></div>
-
-        <div class="proof-block" data-proof-key="plcScada">
-          <p class="proof-caption">Project documentation, simulation results and development updates are available on LinkedIn.</p>
-          <div class="project-links">
-            <a class="btn-link" data-type="linkedin" target="_blank" rel="noopener noreferrer">View LinkedIn Post ↗</a>
-            <a class="btn-link gh" data-type="github" target="_blank" rel="noopener noreferrer">View GitHub ↗</a>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <p class="mono" id="filter-empty" style="display:none;color:var(--text-faint);font-size:13.5px;padding:20px 0;">No projects in this category yet.</p>
-  </div>
-</section>
-
-<!-- ============ EXPERIENCE ============ -->
-<section id="experience">
-  <div class="wrap">
-    <div class="section-head"><span class="section-num">04</span><span class="section-title">Training & Internships</span><div class="rule"></div></div>
-    <div class="tl">
-      <div class="tl-item highlight">
-        <div class="tl-head"><h4>ROS 2 Training — KKR Pvt. Ltd. <span class="tl-relevant">MOST RELEVANT</span></h4><span class="dur">20 days · 2026</span></div>
-        <p>Trained in ROS 2 through simulation, covering nodes, topics, services, navigation, SLAM, and Gazebo.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-head"><h4>PCB Internship — Ascent Circuits</h4><span class="dur">15 days · 2026</span></div>
-        <p>Gained exposure to PCB manufacturing processes, components, and basic production procedures.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-head"><h4>CNC Internship — Delta Pvt. Ltd.</h4><span class="dur">14 days · 2025</span></div>
-        <p>Learned the fundamentals of CNC machining, machine operation, and manufacturing processes.</p>
-      </div>
-      <div class="tl-item">
-        <div class="tl-head"><h4>PLC Internship — NSIC</h4><span class="dur">7 days · 2025</span></div>
-        <p>Gained exposure to PLC fundamentals, ladder logic, and basic industrial automation concepts.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ LEADERSHIP ============ -->
-<section id="leadership">
-  <div class="wrap">
-    <div class="section-head"><span class="section-num">05</span><span class="section-title">Leadership & Engagement</span><div class="rule"></div></div>
-    <ul class="lead-list">
-      <li>Led a team in robotics and AI-focused hackathons, contributing to solution design, technical development, and project presentation.</li>
-      <li>Conducted hands-on training sessions for students in ROS and PLC programming.</li>
-      <li>Collaborated with peers on robotics projects, contributing to problem-solving, system development, and technical discussions.</li>
-    </ul>
-  </div>
-</section>
-
-<!-- ============ EDUCATION + CONTACT ============ -->
-<section id="close">
-  <div class="wrap">
-    <div class="section-head"><span class="section-num">06</span><span class="section-title">Education & <span>Direction</span></span><div class="rule"></div></div>
-
-    <div class="edu-row">
+    <div class="section-head">
       <div>
-        <h4>B.E. Robotics and Automation Engineering</h4>
-        <div class="school">Dhaanish Chennai College of Engineering</div>
+        <span class="index">03 — PROJECTS</span>
+        <h2>System evidence, not just descriptions</h2>
       </div>
-      <div class="edu-meta">
-        <div class="cgpa">CGPA 8.68 / 10</div>
-        <div>Expected 2027</div>
-      </div>
+      <p class="lede">Each project is marked by build status — simulation, concept, or physical hardware.</p>
     </div>
 
-    <div class="direction-grid">
-      <div>ROS 2 Development & Navigation</div>
-      <div>Autonomous Mobile Robots</div>
-      <div>Robotics Software Engineering</div>
-      <div>PLC & Industrial Automation</div>
+    <div class="filters" role="group" aria-label="Filter projects by category">
+      <button class="filter-btn active" data-filter="all" aria-pressed="true">ALL</button>
+      <button class="filter-btn" data-filter="ros2" aria-pressed="false">ROS 2</button>
+      <button class="filter-btn" data-filter="autonomous" aria-pressed="false">AUTONOMOUS ROBOTS</button>
+      <button class="filter-btn" data-filter="cv" aria-pressed="false">COMPUTER VISION</button>
+      <button class="filter-btn" data-filter="industrial" aria-pressed="false">INDUSTRIAL AUTOMATION</button>
     </div>
 
-    <div class="cta-block">
-      <p class="cta-line">Interested in building autonomous robotic systems together?</p>
-      <div class="cta-buttons">
-        <a href="#" class="btn btn-primary" data-cfg-mailto="email">Email Me</a>
-        <a href="#" class="btn btn-secondary" data-cfg-href="linkedin" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="#" class="btn btn-secondary" data-cfg-href="github" target="_blank" rel="noopener noreferrer">GitHub</a>
+    <!-- FEATURED: Multi-Robot Task Allocation -->
+    <article class="featured" data-tags="ros2 autonomous">
+      <div class="featured-top">
+        <div>
+          <span class="featured-eyebrow">FEATURED PROJECT</span>
+          <h3>ROS 2 Multi-Robot Task Allocation &amp; Navigation</h3>
+        </div>
+        <span class="status-tag sim">Simulation</span>
       </div>
-      <div class="contact-grid">
-        <a href="#" data-cfg-mailto="email"><span class="k">EMAIL</span><span data-cfg-text="email"></span></a>
-        <a href="#" data-cfg-tel="phone"><span class="k">PHONE</span><span data-cfg-text="phone"></span></a>
-        <a href="#" data-cfg-href="linkedin" target="_blank" rel="noopener noreferrer"><span class="k">LINKEDIN</span><span data-cfg-text="linkedinShort"></span></a>
-        <a href="#" data-cfg-href="github" target="_blank" rel="noopener noreferrer"><span class="k">GITHUB</span><span data-cfg-text="githubShort"></span></a>
+
+      <div class="case-fields">
+        <div class="case-field">
+          <div class="k">Problem</div>
+          <div class="v">Coordinate multiple mobile robots to complete tasks efficiently, without manually assigning every task to a specific robot.</div>
+        </div>
+        <div class="case-field">
+          <div class="k">Approach</div>
+          <div class="v">Built a ROS 2 / Gazebo simulation where several mobile robots operate simultaneously. Tasks are allocated based on each robot's proximity to the target workspace, and the selected robot then navigates to it autonomously.</div>
+        </div>
+      </div>
+
+      <div class="arch-flow" role="img" aria-label="System architecture: task request, robot selection by proximity, task allocation, ROS 2 and Nav2, autonomous navigation, target workspace">
+        <div class="arch-step"><span class="n">01</span><div class="t">Task Request</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step"><span class="n">02</span><div class="t">Robot Selection / Proximity Evaluation</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step"><span class="n">03</span><div class="t">Task Allocation</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step"><span class="n">04</span><div class="t">ROS 2 / Nav2</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step"><span class="n">05</span><div class="t">Autonomous Navigation</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-step"><span class="n">06</span><div class="t">Target Workspace</div></div>
+      </div>
+
+      <div class="tech-tags">
+        <span class="tech-tag">ROS 2</span><span class="tech-tag">Gazebo</span><span class="tech-tag">Nav2</span><span class="tech-tag">Multi-Robot Coordination</span>
+      </div>
+
+      <div class="featured-media">
+        <video controls playsinline preload="metadata" poster="assets/images/multi-robot-01.jpg">
+          <source src="assets/video/multi-robot-sim.mp4" type="video/mp4">
+          Your browser doesn't support embedded video. <a href="assets/video/multi-robot-sim.mp4">Download the simulation recording</a> instead.
+        </video>
+        <div class="thumbs">
+          <a href="assets/images/multi-robot-01.jpg" target="_blank" rel="noopener" aria-label="Open screenshot 1 full size"><img src="assets/images/multi-robot-01.jpg" alt="Gazebo warehouse simulation: robot1, robot2 and robot3 positioned near the workstation target before task allocation" loading="lazy"></a>
+          <a href="assets/images/multi-robot-02.jpg" target="_blank" rel="noopener" aria-label="Open screenshot 2 full size"><img src="assets/images/multi-robot-02.jpg" alt="Selected robot navigating closer to the green workstation target in the Gazebo warehouse world" loading="lazy"></a>
+          <a href="assets/images/multi-robot-03.jpg" target="_blank" rel="noopener" aria-label="Open screenshot 3 full size"><img src="assets/images/multi-robot-03.jpg" alt="Robot arriving at the workstation target, completing the allocated navigation task" loading="lazy"></a>
+        </div>
+      </div>
+
+      <div class="featured-footer" data-project="multiRobot">
+        <p class="proof-note">Recorded from a live Gazebo simulation run — the video above shows the full task allocation and navigation sequence.</p>
+        <div class="proof-links">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">View LinkedIn Post ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">View Source ↗</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- SECONDARY PROJECT GRID -->
+    <div class="projects-grid">
+
+      <!-- Gesture-Controlled Robot -->
+      <article class="project-card" data-tags="ros2 cv">
+        <div class="pc-top">
+          <h4>Gesture-Controlled Robot</h4>
+          <span class="status-tag sim">Simulation</span>
+        </div>
+        <p class="pc-problem">Control a robot using natural, non-contact input instead of only fixed manual commands.</p>
+        <p class="pc-field"><b>Approach:</b> A simulated system combining computer vision and ROS 2 to recognize hand gestures and translate them into robot control commands.</p>
+        <div class="mini-flow">
+          <span class="step">Camera</span><span class="sep">→</span>
+          <span class="step">OpenCV</span><span class="sep">→</span>
+          <span class="step">Gesture Recognition</span><span class="sep">→</span>
+          <span class="step">ROS 2 Command</span><span class="sep">→</span>
+          <span class="step">Robot</span>
+        </div>
+        <div class="pc-tags"><span>ROS 2</span><span>OpenCV</span><span>Gazebo</span></div>
+        <div class="pc-links" data-project="gesture">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- Obstacle Avoidance Robot -->
+      <article class="project-card" data-tags="autonomous">
+        <div class="pc-top">
+          <h4>Obstacle Avoidance Robot</h4>
+          <span class="status-tag physical">Physical Build</span>
+        </div>
+        <p class="pc-problem">Allow a mobile robot to detect obstacles in its path and correct its movement to avoid collisions.</p>
+        <p class="pc-field"><b>Approach:</b> Sensor-driven control logic reads obstacle distance continuously and adjusts motor output in real time to maintain a clear path.</p>
+        <div class="mini-flow">
+          <span class="step">Obstacle Sensor</span><span class="sep">→</span>
+          <span class="step">Control Logic</span><span class="sep">→</span>
+          <span class="step">Motor Driver</span><span class="sep">→</span>
+          <span class="step">Motion</span><span class="sep">→</span>
+          <span class="step">Path Correction</span>
+        </div>
+        <div class="pc-tags"><span>Embedded Control</span><span>Sensors</span></div>
+        <div class="pc-links" data-project="obstacle">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- Disaster Management Robot -->
+      <article class="project-card" data-tags="autonomous">
+        <div class="pc-top">
+          <h4>Disaster Management Robot</h4>
+          <span class="status-tag concept">Concept / Architecture Stage</span>
+        </div>
+        <p class="pc-problem">Assist rescue teams by detecting hazards and conditions in disaster environments.</p>
+        <p class="pc-field"><b>Concept system architecture</b> — not yet built or deployed.</p>
+        <div class="mini-flow">
+          <span class="step">Environment / Hazard Sensing</span><span class="sep">→</span>
+          <span class="step">Detection / Mapping</span><span class="sep">→</span>
+          <span class="step">Risk Assessment</span><span class="sep">→</span>
+          <span class="step">Alert Rescue Team</span>
+        </div>
+        <div class="pc-tags"><span>Concept</span><span>Sensing</span></div>
+        <div class="pc-links" data-project="disaster">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- PLC / HMI / SCADA -->
+      <article class="project-card industrial-panel" data-tags="industrial">
+        <div class="pc-top">
+          <h4>Industrial Automation System</h4>
+          <span class="status-tag industrial">Simulation</span>
+        </div>
+        <p class="pc-problem">PLC-based conveyor control with auto/manual modes, product counting, VFD control, HMI monitoring, alarms and SCADA visualization.</p>
+        <div class="ladder">
+          <div class="rung"><span class="rail">|—|</span> Sensors / Inputs</div>
+          <div class="rung"><span class="rail">|—|</span> PLC Logic</div>
+          <div class="rung"><span class="rail">|—|</span> Conveyor / VFD</div>
+          <div class="rung"><span class="rail">|—|</span> HMI</div>
+          <div class="rung"><span class="rail">|—|</span> SCADA</div>
+        </div>
+        <div class="pc-tags"><span>PLC</span><span>HMI</span><span>SCADA</span><span>VFD</span></div>
+        <div class="pc-links" data-project="plc">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- SLAM Mapping -->
+      <article class="project-card" data-tags="ros2 autonomous">
+        <div class="pc-top">
+          <h4>SLAM Mapping</h4>
+          <span class="status-tag sim">Simulation</span>
+        </div>
+        <p class="pc-problem">Build a map of an unknown environment while simultaneously tracking the robot's own position inside it.</p>
+        <p class="pc-field"><b>Approach:</b> LiDAR scan data is processed through a ROS 2 SLAM pipeline to build an occupancy grid map in real time, with the robot's pose tracked and visualized as the map is constructed.</p>
+        <div class="mini-flow">
+          <span class="step">LiDAR Scan</span><span class="sep">→</span>
+          <span class="step">SLAM Algorithm</span><span class="sep">→</span>
+          <span class="step">Occupancy Grid Map</span><span class="sep">→</span>
+          <span class="step">Localization</span>
+        </div>
+        <div class="pc-tags"><span>ROS 2</span><span>SLAM</span><span>Gazebo</span></div>
+        <div class="pc-links" data-project="slam">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- Leader-Follower Robot -->
+      <article class="project-card" data-tags="autonomous">
+        <div class="pc-top">
+          <h4>Leader-Follower Robot</h4>
+          <span class="status-tag physical">Physical Build</span>
+        </div>
+        <p class="pc-problem">Enable one robot to autonomously track and follow another robot at a safe distance, without manual control.</p>
+        <p class="pc-field"><b>Approach:</b> The follower continuously senses the leader's relative distance and bearing, then adjusts its own speed and heading to maintain formation as the leader moves.</p>
+        <div class="mini-flow">
+          <span class="step">Leader Sensing</span><span class="sep">→</span>
+          <span class="step">Distance / Bearing Calc.</span><span class="sep">→</span>
+          <span class="step">Control Logic</span><span class="sep">→</span>
+          <span class="step">Motor Output</span><span class="sep">→</span>
+          <span class="step">Following Motion</span>
+        </div>
+        <div class="pc-tags"><span>Sensors</span><span>Embedded Control</span></div>
+        <div class="pc-links" data-project="leaderFollower">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+      <!-- Line Follower Robot -->
+      <article class="project-card" data-tags="autonomous">
+        <div class="pc-top">
+          <h4>Line Follower Robot</h4>
+          <span class="status-tag physical">Physical Build</span>
+        </div>
+        <p class="pc-problem">Guide a robot to automatically trace a fixed path without manual steering.</p>
+        <p class="pc-field"><b>Approach:</b> A line sensor array reads the robot's position relative to the line, and control logic continuously corrects motor speed on each side to stay on path.</p>
+        <div class="mini-flow">
+          <span class="step">Line Sensor Array</span><span class="sep">→</span>
+          <span class="step">Position Error Calc.</span><span class="sep">→</span>
+          <span class="step">Control Logic</span><span class="sep">→</span>
+          <span class="step">Motor Correction</span><span class="sep">→</span>
+          <span class="step">Path Tracking</span>
+        </div>
+        <div class="pc-tags"><span>IR Sensors</span><span>Embedded Control</span></div>
+        <div class="pc-links" data-project="lineFollower">
+          <a href="#" data-type="linkedin" data-hide-if-empty target="_blank" rel="noopener">LinkedIn ↗</a>
+          <a href="#" data-type="github" data-hide-if-empty target="_blank" rel="noopener">Source ↗</a>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="filter-empty" id="filterEmpty" hidden>No projects in this category yet — check back soon.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     TRAINING & INTERNSHIPS
+     ============================================================ -->
+<section id="timeline">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="index">04 — TIMELINE</span>
+        <h2>Training &amp; internships</h2>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="tl-item primary">
+        <div class="tl-head">
+          <h4>ROS 2 Training — KKR Pvt. Ltd.</h4>
+          <span class="tl-meta">20 days · 2026</span>
+        </div>
+        <p class="tl-org">Simulation-based training covering the core ROS 2 workflow.</p>
+        <div class="tl-topics"><span>Nodes</span><span>Topics</span><span>Services</span><span>Navigation</span><span>SLAM</span><span>Gazebo</span></div>
+        <span class="tl-highlight">↳ Most directly relevant to my current robotics direction</span>
+      </div>
+      <div class="tl-item">
+        <div class="tl-head"><h4>PCB Internship — Ascent Circuits</h4><span class="tl-meta">15 days · 2026</span></div>
+        <p class="tl-org">Exposure to PCB manufacturing processes, components and basic production procedures.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-head"><h4>CNC Internship — Delta Pvt. Ltd.</h4><span class="tl-meta">14 days · 2025</span></div>
+        <p class="tl-org">Fundamentals of CNC machining, machine operation and manufacturing processes.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-head"><h4>PLC Internship — NSIC</h4><span class="tl-meta">7 days · 2025</span></div>
+        <p class="tl-org">PLC fundamentals, ladder logic and basic industrial automation concepts.</p>
       </div>
     </div>
   </div>
 </section>
 
-</main>
+<!-- ============================================================
+     LEADERSHIP + EDUCATION
+     ============================================================ -->
+<section id="leadership">
+  <div class="wrap two-col">
+    <div>
+      <span class="index">05 — LEADERSHIP</span>
+      <h2 style="margin-bottom:24px;">Leadership &amp; engagement</h2>
+      <ul class="plain-list">
+        <li>Led a team in robotics and AI-focused hackathons, contributing to solution design, technical development and project presentation.</li>
+        <li>Conducted hands-on training sessions for students in ROS and PLC programming.</li>
+        <li>Collaborated with peers on robotics projects — problem-solving, system development and technical discussion.</li>
+      </ul>
+    </div>
+    <div>
+      <span class="index">06 — EDUCATION</span>
+      <h2 style="margin-bottom:24px;">Education</h2>
+      <div class="edu-card">
+        <h4>B.E. Robotics and Automation Engineering</h4>
+        <p class="edu-meta">Dhaanish Chennai College of Engineering</p>
+        <div class="edu-stats">
+          <div><span class="num">8.68</span><span class="lbl">CGPA / 10</span></div>
+          <div><span class="num">2027</span><span class="lbl">Expected Graduation</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-<footer>Jafrein A M — Robotics & Automation Engineering Student Portfolio</footer>
+<!-- ============================================================
+     CAREER DIRECTION
+     ============================================================ -->
+<section id="direction">
+  <div class="wrap">
+    <span class="index">07 — DIRECTION</span>
+    <h2>Where I'm headed next</h2>
+    <p class="lede" style="margin-top:14px;">Actively looking for a ROS 2 / robotics internship where I can move from simulation into real hardware.</p>
+    <div class="direction-tags">
+      <span>ROS 2 Development</span>
+      <span>Autonomous Navigation</span>
+      <span>Autonomous Mobile Robots</span>
+      <span>Robotics Software Engineering</span>
+      <span>Sensor Integration</span>
+      <span>Industrial Automation</span>
+    </div>
+  </div>
+</section>
 
-<!-- ============ LIGHTBOX ============ -->
-<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Project image preview">
-  <button class="lightbox-close" id="lightboxClose" type="button">Close ✕</button>
-  <img id="lightboxImg" src="" alt="">
-</div>
+<!-- ============================================================
+     CONTACT
+     ============================================================ -->
+<section class="contact" id="contact" style="border-bottom:none;">
+  <div class="wrap">
+    <span class="index">08 — CONTACT</span>
+    <h2>Interested in building autonomous systems together?</h2>
+    <p class="lede">I'm open to ROS 2 and robotics internship opportunities — reach out through any of the channels below.</p>
+    <div class="contact-grid">
+      <a class="contact-item" href="#" data-cfg-mailto="email">
+        <span class="k">EMAIL</span><span class="v" data-cfg-text="email"></span>
+      </a>
+      <a class="contact-item" href="#" data-cfg-tel="phone" data-hide-if-empty>
+        <span class="k">PHONE</span><span class="v" data-cfg-text="phoneDisplay"></span>
+      </a>
+      <a class="contact-item" href="#" data-cfg-href="linkedin" target="_blank" rel="noopener">
+        <span class="k">LINKEDIN</span><span class="v" data-cfg-text="linkedinShort"></span>
+      </a>
+      <a class="contact-item" href="#" data-cfg-href="github" target="_blank" rel="noopener">
+        <span class="k">GITHUB</span><span class="v" data-cfg-text="githubShort"></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Designed &amp; built by Jafrein A M — Chennai, India</p>
+</footer>
 
 <script>
-/* ==============================================================
+/* ============================================================
    QUICK EDIT: CONFIG
-   Change the values below. Anything left as a placeholder
-   (not a real http/https URL) is automatically hidden from
-   the rendered page instead of showing a dead link.
-   ============================================================== */
+   ------------------------------------------------------------
+   Everything you're likely to change lives here.
+
+   CONFIG.email / phone / linkedin / github / resumeUrl
+     → used in the nav, hero and contact section.
+     → resumeUrl is already set to the local PDF shipped in
+       /assets/resume. Replace it with a hosted URL if you'd
+       rather link out instead.
+
+   CONFIG.projects.<key>.linkedinPost / github
+     → leave as "" to automatically hide that button — never
+       shows a dead link.
+
+   CONFIG.projects.<key>.images / video
+     → NOT wired into the page yet, because no verified media
+       was supplied for any project at build time. Once you
+       have real screenshots or a simulation recording:
+         1. drop the files into /assets/images or /assets/video
+         2. add the filenames to the arrays below
+         3. tell me (or a future edit) to wire them into the
+            featured project / project cards
+       Never replace this with placeholder or stock imagery.
+   ============================================================ */
 const CONFIG = {
   email: "jafrein96@gmail.com",
   phone: "+91 81220 74789",
   linkedin: "https://linkedin.com/in/jafreinam",
   github: "https://github.com/Jafrein",
-  resumeUrl: "", // e.g. "https://drive.google.com/your-resume.pdf" — leave "" to hide the Resume link
+  resumeUrl: "assets/resume/Jafrein-AM-Resume.pdf",
 
   projects: {
-    multiRobot: {
-      linkedinPost: "MULTI_ROBOT_LINKEDIN_POST_URL",
-      github: "MULTI_ROBOT_GITHUB_URL",
-      images: ["images/multi-robot-1.jpg", "images/multi-robot-2.jpg", "images/multi-robot-3.jpg"]
-    },
-    gestureRobot: {
-      linkedinPost: "GESTURE_ROBOT_LINKEDIN_POST_URL",
-      github: "GESTURE_ROBOT_GITHUB_URL",
-      images: ["images/gesture-robot.jpg", "images/gesture-robot-2.jpg"]
-    },
-    disasterRobot: {
-      linkedinPost: "DISASTER_ROBOT_LINKEDIN_POST_URL",
-      github: "DISASTER_ROBOT_GITHUB_URL",
-      images: ["images/disaster-robot.jpg"]
-    },
-    obstacleRobot: {
-      linkedinPost: "OBSTACLE_ROBOT_LINKEDIN_POST_URL",
-      github: "OBSTACLE_ROBOT_GITHUB_URL",
-      images: ["images/obstacle-robot.jpg"]
-    },
-    plcScada: {
-      linkedinPost: "PLC_SCADA_LINKEDIN_POST_URL",
-      github: "PLC_SCADA_GITHUB_URL",
-      images: ["images/plc-scada.jpg", "images/plc-scada-2.jpg"]
-    }
+    multiRobot: { linkedinPost: "", github: "", images: ["multi-robot-01.jpg","multi-robot-02.jpg","multi-robot-03.jpg"], video: "multi-robot-sim.mp4" },
+    gesture:    { linkedinPost: "https://lnkd.in/p/g-g4xCmU", github: "", images: [], video: "" },
+    disaster:   { linkedinPost: "", github: "", images: [], video: "" },
+    obstacle:   { linkedinPost: "https://lnkd.in/p/gFm5UwnV", github: "", images: [], video: "" },
+    plc:        { linkedinPost: "", github: "", images: [], video: "" },
+    slam:           { linkedinPost: "https://lnkd.in/p/ga6aRS72", github: "", images: [], video: "" },
+    leaderFollower: { linkedinPost: "https://lnkd.in/p/gvFTK9gR", github: "", images: [], video: "" },
+    lineFollower:   { linkedinPost: "https://lnkd.in/p/gAZbd-WB", github: "", images: [], video: "" }
   }
 };
 
-/* ---------------------------------------------------------- */
-function isRealUrl(v){
-  return typeof v === "string" && /^https?:\/\//i.test(v.trim());
-}
-
-function shortenUrl(url){
+/* ---------- helpers ---------- */
+function isRealUrl(v){ return typeof v === "string" && v.trim() !== "" && v !== "#"; }
+function shortenUrl(u){
   try{
-    const u = new URL(url);
-    return (u.hostname.replace(/^www\./,"") + u.pathname).replace(/\/$/,"");
-  }catch(e){ return url; }
+    const url = new URL(u);
+    return (url.hostname.replace("www.","") + url.pathname).replace(/\/$/,"");
+  }catch(e){ return u; }
 }
 
-// Populate simple profile-level links (hero, contact section)
-document.querySelectorAll("[data-cfg-href]").forEach(el => {
+document.querySelectorAll("[data-cfg-href]").forEach(el=>{
   const key = el.getAttribute("data-cfg-href");
   const val = CONFIG[key];
-  if(isRealUrl(val)){
-    el.href = val;
-  } else if (el.hasAttribute("data-hide-if-empty")) {
-    el.style.display = "none";
-  } else {
-    el.removeAttribute("href");
-    el.style.opacity = "0.4";
-    el.style.pointerEvents = "none";
-  }
+  if(isRealUrl(val)){ el.href = val; }
+  else if(el.hasAttribute("data-hide-if-empty")){ el.setAttribute("hidden",""); }
 });
-document.querySelectorAll("[data-cfg-mailto]").forEach(el => {
+document.querySelectorAll("[data-cfg-mailto]").forEach(el=>{
   const key = el.getAttribute("data-cfg-mailto");
   if(CONFIG[key]) el.href = "mailto:" + CONFIG[key];
 });
-document.querySelectorAll("[data-cfg-tel]").forEach(el => {
+document.querySelectorAll("[data-cfg-tel]").forEach(el=>{
   const key = el.getAttribute("data-cfg-tel");
-  if(CONFIG[key]) el.href = "tel:" + CONFIG[key].replace(/\s+/g,"");
+  if(CONFIG[key]){ el.href = "tel:" + CONFIG[key].replace(/\s+/g,""); }
+  else if(el.hasAttribute("data-hide-if-empty")){ el.setAttribute("hidden",""); }
 });
-document.querySelectorAll("[data-cfg-text]").forEach(el => {
+document.querySelectorAll("[data-cfg-text]").forEach(el=>{
   const key = el.getAttribute("data-cfg-text");
-  if(key === "linkedinShort") el.textContent = isRealUrl(CONFIG.linkedin) ? shortenUrl(CONFIG.linkedin) : CONFIG.linkedin;
-  else if(key === "githubShort") el.textContent = isRealUrl(CONFIG.github) ? shortenUrl(CONFIG.github) : CONFIG.github;
-  else el.textContent = CONFIG[key] || "";
+  if(key === "linkedinShort") el.textContent = shortenUrl(CONFIG.linkedin);
+  else if(key === "githubShort") el.textContent = shortenUrl(CONFIG.github);
+  else if(key === "phoneDisplay") el.textContent = CONFIG.phone;
+  else if(CONFIG[key]) el.textContent = CONFIG[key];
 });
 
-// Build image galleries with graceful fallback for missing files
-document.querySelectorAll("[data-gallery-key]").forEach(galleryEl => {
-  const key = galleryEl.getAttribute("data-gallery-key");
+/* per-project LinkedIn / GitHub buttons: hide if no real URL exists */
+document.querySelectorAll("[data-project]").forEach(wrap=>{
+  const key = wrap.getAttribute("data-project");
   const proj = CONFIG.projects[key];
-  if(!proj || !proj.images || !proj.images.length){ galleryEl.style.display = "none"; return; }
-
-  proj.images.forEach((src, i) => {
-    const fig = document.createElement("figure");
-    fig.className = "gallery-item";
-    fig.setAttribute("tabindex", "0");
-    fig.setAttribute("role", "button");
-    fig.setAttribute("aria-label", "Open project image " + (i+1) + " in full view");
-
-    const img = document.createElement("img");
-    img.src = src;
-    img.loading = "lazy";
-    img.alt = "Screenshot or photo from the " + key.replace(/([A-Z])/g," $1").toLowerCase() + " project — placeholder until a real image is added";
-    img.addEventListener("error", () => fig.classList.add("img-missing"));
-
-    const fallback = document.createElement("div");
-    fallback.className = "img-fallback";
-    fallback.innerHTML = '<span class="tag-mini mono">IMAGE PENDING</span><p>Add project image<br><code>' + src + '</code></p>';
-
-    fig.appendChild(img);
-    fig.appendChild(fallback);
-
-    const openIfReady = () => { if(!fig.classList.contains("img-missing")) openLightbox(img); };
-    fig.addEventListener("click", openIfReady);
-    fig.addEventListener("keydown", e => { if(e.key === "Enter" || e.key === " "){ e.preventDefault(); openIfReady(); } });
-
-    galleryEl.appendChild(fig);
+  if(!proj) return;
+  wrap.querySelectorAll("[data-type]").forEach(a=>{
+    const type = a.getAttribute("data-type");
+    const url = type === "linkedin" ? proj.linkedinPost : proj.github;
+    if(isRealUrl(url)){ a.href = url; }
+    else { a.setAttribute("hidden",""); }
   });
 });
 
-// Wire per-project LinkedIn / GitHub proof links; hide the whole block if neither exists
-document.querySelectorAll("[data-proof-key]").forEach(block => {
-  const key = block.getAttribute("data-proof-key");
-  const proj = CONFIG.projects[key];
-  const li = block.querySelector('[data-type="linkedin"]');
-  const gh = block.querySelector('[data-type="github"]');
-
-  const hasLinkedin = proj && isRealUrl(proj.linkedinPost);
-  const hasGithub = proj && isRealUrl(proj.github);
-
-  if(hasLinkedin){ li.href = proj.linkedinPost; } else { li.style.display = "none"; }
-  if(hasGithub){ gh.href = proj.github; } else { gh.style.display = "none"; }
-
-  if(!hasLinkedin && !hasGithub){ block.style.display = "none"; }
+/* mobile nav toggle */
+const navToggle = document.getElementById("navToggle");
+const navLinks = document.getElementById("navLinks");
+navToggle.addEventListener("click", ()=>{
+  const open = navLinks.classList.toggle("open");
+  navToggle.setAttribute("aria-expanded", open ? "true" : "false");
 });
+navLinks.querySelectorAll("a").forEach(a=>a.addEventListener("click", ()=> navLinks.classList.remove("open")));
 
-// Lightbox
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = document.getElementById("lightboxImg");
-function openLightbox(imgEl){
-  lightboxImg.src = imgEl.src;
-  lightboxImg.alt = imgEl.alt;
-  lightbox.classList.add("open");
-  document.getElementById("lightboxClose").focus();
-}
-function closeLightbox(){
-  lightbox.classList.remove("open");
-  lightboxImg.src = "";
-}
-document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", e => { if(e.target === lightbox) closeLightbox(); });
-document.addEventListener("keydown", e => { if(e.key === "Escape" && lightbox.classList.contains("open")) closeLightbox(); });
-
-// Project filter
-const filterButtons = document.querySelectorAll(".filter-btn");
-const projectCards = document.querySelectorAll(".project[data-category]");
-const emptyMsg = document.getElementById("filter-empty");
-filterButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    filterButtons.forEach(b => b.classList.remove("active"));
+/* project filters */
+const filterBtns = document.querySelectorAll(".filter-btn");
+const filterable = document.querySelectorAll("[data-tags]");
+filterBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    filterBtns.forEach(b=>{ b.classList.remove("active"); b.setAttribute("aria-pressed","false"); });
     btn.classList.add("active");
-    const filter = btn.getAttribute("data-filter");
+    btn.setAttribute("aria-pressed","true");
+    const f = btn.getAttribute("data-filter");
     let visibleCount = 0;
-    projectCards.forEach(card => {
-      const cats = card.getAttribute("data-category").split(" ");
-      const show = filter === "all" || cats.includes(filter);
-      card.classList.toggle("hidden-by-filter", !show);
+    filterable.forEach(el=>{
+      const tags = el.getAttribute("data-tags").split(" ");
+      const show = (f === "all" || tags.includes(f));
+      el.style.display = show ? "" : "none";
       if(show) visibleCount++;
     });
-    emptyMsg.style.display = visibleCount === 0 ? "block" : "none";
+    const emptyMsg = document.getElementById("filterEmpty");
+    if(emptyMsg) emptyMsg.hidden = visibleCount > 0;
   });
+});
+
+/* collapse link-wrappers (proof-links / pc-links) that end up with
+   zero visible links, so hiding a placeholder never leaves dangling
+   empty space in a project card */
+document.querySelectorAll(".proof-links, .pc-links").forEach(wrap=>{
+  const visible = Array.from(wrap.querySelectorAll("a")).some(a=>!a.hasAttribute("hidden"));
+  if(!visible) wrap.setAttribute("hidden","");
 });
 </script>
 </body>
